@@ -3,7 +3,6 @@ import mongoose from "mongoose";
 import timestamps from "mongoose-timestamp";
 import sanitize from "mongoose-sanitize";
 import bcrypt from "bcryptjs";
-import { profile } from "winston";
 
 const userSchema = new Schema({
   name: {

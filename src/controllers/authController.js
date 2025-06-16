@@ -20,12 +20,14 @@ const cookieOptions = {
 export const authController = {
   async register(req, res, next) {
     try {
-      const { name, email, password } = req.body;
+      const { name, email, password, nickname, profilePicture } = req.body;
       
       const user = await User.create({
         name,
         email,
         password,
+        nickname,
+        profilePicture
       });
 
       const token = generateToken(user._id);
@@ -46,7 +48,7 @@ export const authController = {
       if (error.code === 11000) {
         return res.status(400).json({
           success: false,
-          error: "Email já está em uso",
+          error: "Email ou Nickname já está em uso",
         });
       }
       next(error);

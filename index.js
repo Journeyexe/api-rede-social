@@ -1,13 +1,17 @@
 import express from "express";
 import cors from "cors";
 import "dotenv/config";
+import cookieParser from "cookie-parser";
 import { logger } from "./src/config/logger.js";
+import { errorHandler } from "./src/middleware/errorHandler.js";
 import { connectDB } from "./src/config/database.js";
+import { router as authRoutes } from "./src/routes/authRoutes.js";
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(express.json());
+app.use(cookieParser());
 app.use(
   cors({
     origin: process.env.CORS_ORIGIN || "*",
@@ -17,6 +21,13 @@ app.use(
   })
 );
 
+// Routes
+app.use("/api/auth", authRoutes);
+
+// Error handling
+app.use(errorHandler);
+
+// Inicialização do servidor
 const startServer = async () => {
   try {
     await connectDB(process.env.MONGO_URI);
