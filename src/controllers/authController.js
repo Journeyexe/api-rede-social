@@ -21,19 +21,19 @@ export const authController = {
   async register(req, res, next) {
     try {
       const { name, email, password, nickname, profilePicture } = req.body;
-      
+
       const user = await User.create({
         name,
         email,
         password,
-        nickname,
-        profilePicture
+        nickname: nickname.toLowerCase(),
+        profilePicture,
       });
 
       const token = generateToken(user._id);
-      
+
       res.cookie("jwt", token, cookieOptions);
-      
+
       res.status(201).json({
         success: true,
         data: {
@@ -58,20 +58,20 @@ export const authController = {
   async login(req, res, next) {
     try {
       const { email, password } = req.body;
-      
+
       const user = await User.findOne({ email }).select("+password");
-      
+
       if (!user || !(await user.comparePassword(password))) {
         return res.status(401).json({
           success: false,
           error: "Credenciais inválidas",
         });
       }
-      
+
       const token = generateToken(user._id);
-      
+
       res.cookie("jwt", token, cookieOptions);
-      
+
       res.status(200).json({
         success: true,
         data: {
@@ -92,7 +92,7 @@ export const authController = {
       httpOnly: true,
       expires: new Date(0),
     });
-    
+
     res.status(200).json({
       success: true,
       message: "Logout realizado com sucesso",
@@ -102,7 +102,7 @@ export const authController = {
   async getMe(req, res, next) {
     try {
       const user = await User.findById(req.user.id);
-      
+
       res.status(200).json({
         success: true,
         data: user,
