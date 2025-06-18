@@ -28,6 +28,10 @@ const postSchema = new Schema({
     type: Number,
     default: 0,
   },
+  comments_count: {
+    type: Number,
+    default: 0,
+  },
 });
 
 // Plugins

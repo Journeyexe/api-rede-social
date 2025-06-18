@@ -9,6 +9,7 @@ import {
   deletePost,
   likePost,
 } from "../controllers/postController.js";
+import commentRoutes from "./commentRoutes.js";
 
 const router = express.Router();
 
@@ -22,5 +23,8 @@ router.route("/:id").get(getPostById).put(updatePost).delete(deletePost);
 
 router.route("/user/:userId").get(getUserPosts);
 router.route("/:id/like").post(likePost);
+
+// Nest comment routes under posts
+router.use("/:postId/comments", commentRoutes);
 
 export default router;
