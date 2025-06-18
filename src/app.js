@@ -2,11 +2,11 @@ import express from "express";
 import cors from "cors";
 import "dotenv/config";
 import cookieParser from "cookie-parser";
-import { logger } from "./src/config/logger.js";
-import { errorHandler } from "./src/middleware/errorHandler.js";
-import { connectDB } from "./src/config/database.js";
-import { router as authRoutes } from "./src/routes/authRoutes.js";
-import postRoutes from "./src/routes/postRoutes.js";
+import { logger } from "./config/logger.js";
+import { errorHandler } from "./middleware/errorHandler.js";
+import { connectDB } from "./config/database.js";
+import { router as authRoutes } from "./routes/authRoutes.js";
+import postRoutes from "./routes/postRoutes.js";
 
 const app = express();
 const port = process.env.PORT || 3000;
