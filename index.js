@@ -6,6 +6,7 @@ import { logger } from "./src/config/logger.js";
 import { errorHandler } from "./src/middleware/errorHandler.js";
 import { connectDB } from "./src/config/database.js";
 import { router as authRoutes } from "./src/routes/authRoutes.js";
+import postRoutes from "./src/routes/postRoutes.js";
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -23,6 +24,7 @@ app.use(
 
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/posts", postRoutes);
 
 // Error handling
 app.use(errorHandler);
