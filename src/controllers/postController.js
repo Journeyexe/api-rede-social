@@ -4,11 +4,12 @@ import { logger } from "../config/logger.js";
 // Create a new post
 export const createPost = async (req, res, next) => {
   try {
-    const { content, media_url } = req.body;
+    const { title, content, media_url } = req.body;
     const userId = req.user.id;
 
     const post = new Post({
       user: userId,
+      title,
       content,
       media_url,
     });
@@ -110,7 +111,7 @@ export const getPostById = async (req, res, next) => {
 // Update a post
 export const updatePost = async (req, res, next) => {
   try {
-    const { content, media_url } = req.body;
+    const { title, content, media_url } = req.body;
     const postId = req.params.id;
 
     // Find post and check if user is the owner
@@ -135,6 +136,7 @@ export const updatePost = async (req, res, next) => {
     const updatedPost = await Post.findByIdAndUpdate(
       postId,
       {
+        title,
         content,
         media_url,
       },

@@ -141,6 +141,7 @@ npm run dev
 
 ### Post
 - `user`: Referência ao usuário que criou
+- `title`: Título do post
 - `content`: Conteúdo do post
 - `media_url`: URL opcional para mídia (imagem/vídeo)
 - `likes`: Lista de usuários que curtiram
@@ -183,6 +184,7 @@ POST /api/auth/login
 POST /api/posts
 Headers: Authorization: Bearer [token]
 {
+  "title": "Meu primeiro post",
   "content": "Minha primeira postagem!",
   "media_url": "https://exemplo.com/imagem.jpg"
 }
