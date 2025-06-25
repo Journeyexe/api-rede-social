@@ -266,23 +266,27 @@ export const savePost = async (req, res, next) => {
     }
 
     // Check if the post is already saved by the user
-    const isSaved = user.savedPosts.includes(postId);
+    const isSaved = post.saved.includes(userId);
 
     if (isSaved) {
       // Unsave the post
+      post.saved = post.saved.filter((id) => id.toString() !== userId);
       user.savedPosts = user.savedPosts.filter(
         (id) => id.toString() !== postId
       );
     } else {
       // Save the post
+      post.saved.push(userId);
       user.savedPosts.push(postId);
     }
 
+    await post.save();
     await user.save();
 
     res.status(200).json({
       success: true,
       saved: !isSaved,
+      savedCount: post.saved_count,
       message: isSaved
         ? "Post unsaved successfully"
         : "Post saved successfully",

@@ -34,6 +34,16 @@ const postSchema = new Schema({
     type: Number,
     default: 0,
   },
+  saved: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
+  saved_count: {
+    type: Number,
+    default: 0,
+  },
   comments_count: {
     type: Number,
     default: 0,
@@ -44,10 +54,13 @@ const postSchema = new Schema({
 postSchema.plugin(timestamps);
 postSchema.plugin(sanitize);
 
-// Middleware to update likes_count before saving
+// Middleware to update likes_count and saved_count before saving
 postSchema.pre("save", function (next) {
   if (this.isModified("likes")) {
     this.likes_count = this.likes.length;
+  }
+  if (this.isModified("saved")) {
+    this.saved_count = this.saved.length;
   }
   next();
 });
