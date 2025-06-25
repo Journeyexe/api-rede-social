@@ -8,6 +8,9 @@ import {
   updatePost,
   deletePost,
   likePost,
+  savePost,
+  getSavedPosts,
+  getLikedPosts,
 } from "../controllers/postController.js";
 import commentRoutes from "./commentRoutes.js";
 
@@ -23,6 +26,9 @@ router.route("/:id").get(getPostById).put(updatePost).delete(deletePost);
 
 router.route("/user/:userId").get(getUserPosts);
 router.route("/:id/like").post(likePost);
+router.route("/:id/save").post(savePost);
+router.route("/saved").get(getSavedPosts);
+router.route("/liked").get(getLikedPosts);
 
 // Nest comment routes under posts
 router.use("/:postId/comments", commentRoutes);

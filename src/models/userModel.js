@@ -37,6 +37,18 @@ const userSchema = new Schema({
       return `https://api.dicebear.com/9.x/dylan/png/seed=${this.nickname}`;
     },
   },
+  likedPosts: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Post",
+    },
+  ],
+  savedPosts: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Post",
+    },
+  ],
 });
 
 // Plugins
