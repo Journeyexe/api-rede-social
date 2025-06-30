@@ -113,7 +113,8 @@ GET    /api/posts/user/:userId - Listar posts de um usuário específico
 
 ### 💬 Comentários
 ```
-GET    /api/posts/:postId/comments                    - Listar comentários de um post
+GET    /api/posts/:postId/comments                    - Listar comentários de um post (hierárquico)
+GET    /api/posts/:postId/comments/all                - Listar todos os comentários (estrutura plana)
 POST   /api/posts/:postId/comments                    - Criar comentário em um post
 PUT    /api/posts/:postId/comments/:commentId         - Atualizar comentário (autor apenas)
 DELETE /api/posts/:postId/comments/:commentId         - Excluir comentário (autor apenas)
@@ -315,6 +316,71 @@ Content-Type: application/json
 }
 ```
 
+### Listar comentários de um post (estrutura hierárquica)
+```bash
+GET /api/posts/123/comments?page=1&limit=20
+Authorization: Bearer [token]
+
+# Resposta com comentários organizados hierarquicamente:
+{
+  "success": true,
+  "count": 10,
+  "total": 15,
+  "pages": 1,
+  "data": [
+    {
+      "_id": "comment1",
+      "content": "Comentário principal",
+      "user": {
+        "name": "João",
+        "nickname": "joao123"
+      },
+      "level": 0,
+      "replies": [
+        {
+          "_id": "reply1",
+          "content": "Resposta ao comentário",
+          "user": {
+            "name": "Maria",
+            "nickname": "maria456"
+          },
+          "level": 1,
+          "replies": []
+        }
+      ]
+    }
+  ]
+}
+```
+
+### Listar todos os comentários (estrutura plana)
+```bash
+GET /api/posts/123/comments/all?page=1&limit=50
+Authorization: Bearer [token]
+
+# Resposta com todos os comentários em ordem cronológica:
+{
+  "success": true,
+  "count": 25,
+  "total": 25,
+  "pages": 1,
+  "data": [
+    {
+      "_id": "comment1",
+      "content": "Primeiro comentário",
+      "level": 0,
+      "parent": null
+    },
+    {
+      "_id": "reply1",
+      "content": "Resposta ao primeiro",
+      "level": 1,
+      "parent": "comment1"
+    }
+  ]
+}
+```
+
 ### Responder a um comentário
 ```bash
 POST /api/posts/123/comments
@@ -324,21 +390,6 @@ Content-Type: application/json
 {
   "content": "Concordo completamente!",
   "parentId": "456"
-}
-```
-
-### Listar posts salvos
-```bash
-GET /api/posts/saved?page=1&limit=10
-Authorization: Bearer [token]
-
-# Resposta com paginação:
-{
-  "success": true,
-  "count": 10,
-  "total": 25,
-  "pages": 3,
-  "data": [...]
 }
 ```
 

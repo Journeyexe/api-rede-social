@@ -3,6 +3,7 @@ import { protect } from "../middleware/authMiddleware.js";
 import {
   createComment,
   getPostComments,
+  getAllPostCommentsFlat,
   getCommentReplies,
   updateComment,
   deleteComment,
@@ -16,6 +17,9 @@ router.use(protect);
 
 // Comments for a post
 router.route("/").post(createComment).get(getPostComments);
+
+// Alternative route for flat structure (optional)
+router.route("/all").get(getAllPostCommentsFlat);
 
 // Operations on a specific comment
 router.route("/:commentId").put(updateComment).delete(deleteComment);

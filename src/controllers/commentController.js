@@ -69,32 +69,48 @@ export const getPostComments = async (req, res, next) => {
     const limit = parseInt(req.query.limit, 10) || 20;
     const skip = (page - 1) * limit;
 
-    // Get only top-level comments (no parent)
-    const comments = await Comment.find({
+    // Get ALL comments for the post (including replies)
+    const allComments = await Comment.find({
       post: postId,
-      parent: null,
     })
       .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .populate("user", "name nickname profilePicture")
-      .populate({
-        path: "replies",
-        populate: {
-          path: "user",
-          select: "name nickname profilePicture",
-        },
-        options: { sort: { createdAt: -1 }, limit: 5 }, // Only get top 5 replies initially
-      });
+      .populate("user", "name nickname profilePicture");
 
-    const total = await Comment.countDocuments({ post: postId, parent: null });
+    // Organize comments hierarchically
+    const commentMap = new Map();
+    const topLevelComments = [];
+
+    // First pass: create map of all comments and identify top-level ones
+    allComments.forEach((comment) => {
+      const commentObj = comment.toObject();
+      commentObj.replies = [];
+      commentMap.set(comment._id.toString(), commentObj);
+
+      if (!comment.parent) {
+        topLevelComments.push(commentObj);
+      }
+    });
+
+    // Second pass: organize replies under their parents
+    allComments.forEach((comment) => {
+      if (comment.parent) {
+        const parentComment = commentMap.get(comment.parent.toString());
+        if (parentComment) {
+          parentComment.replies.push(commentMap.get(comment._id.toString()));
+        }
+      }
+    });
+
+    // Apply pagination to top-level comments only
+    const paginatedTopLevel = topLevelComments.slice(skip, skip + limit);
+    const total = topLevelComments.length;
 
     res.status(200).json({
       success: true,
-      count: comments.length,
+      count: paginatedTopLevel.length,
       total,
       pages: Math.ceil(total / limit),
-      data: comments,
+      data: paginatedTopLevel,
     });
   } catch (error) {
     logger.error(`Error getting post comments: ${error.message}`);
@@ -267,6 +283,38 @@ export const likeComment = async (req, res, next) => {
     });
   } catch (error) {
     logger.error(`Error liking comment: ${error.message}`);
+    next(error);
+  }
+};
+
+// Alternative method: Get all comments for a post (flat structure with level indication)
+export const getAllPostCommentsFlat = async (req, res, next) => {
+  try {
+    const { postId } = req.params;
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 50;
+    const skip = (page - 1) * limit;
+
+    // Get ALL comments for the post, sorted by creation date
+    const comments = await Comment.find({
+      post: postId,
+    })
+      .sort({ createdAt: 1 }) // Ascending order to maintain conversation flow
+      .skip(skip)
+      .limit(limit)
+      .populate("user", "name nickname profilePicture");
+
+    const total = await Comment.countDocuments({ post: postId });
+
+    res.status(200).json({
+      success: true,
+      count: comments.length,
+      total,
+      pages: Math.ceil(total / limit),
+      data: comments,
+    });
+  } catch (error) {
+    logger.error(`Error getting all post comments: ${error.message}`);
     next(error);
   }
 };
