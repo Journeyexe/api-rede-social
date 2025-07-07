@@ -31,7 +31,7 @@ export const createPost = async (req, res, next) => {
 export const getAllPosts = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page, 10) || 1;
-    const limit = parseInt(req.query.limit, 10) || 10;
+    const limit = parseInt(req.query.limit, 10) || 1000;
     const skip = (page - 1) * limit;
 
     const posts = await Post.find()
@@ -60,7 +60,7 @@ export const getUserPosts = async (req, res, next) => {
   try {
     const { userId } = req.params;
     const page = parseInt(req.query.page, 10) || 1;
-    const limit = parseInt(req.query.limit, 10) || 10;
+    const limit = parseInt(req.query.limit, 10) || 1000;
     const skip = (page - 1) * limit;
 
     const posts = await Post.find({ user: userId })
@@ -302,7 +302,7 @@ export const getSavedPosts = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const page = parseInt(req.query.page, 10) || 1;
-    const limit = parseInt(req.query.limit, 10) || 10;
+    const limit = parseInt(req.query.limit, 10) || 1000;
     const skip = (page - 1) * limit;
 
     const user = await User.findById(userId).populate({
@@ -345,7 +345,7 @@ export const getLikedPosts = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const page = parseInt(req.query.page, 10) || 1;
-    const limit = parseInt(req.query.limit, 10) || 10;
+    const limit = parseInt(req.query.limit, 10) || 1000;
     const skip = (page - 1) * limit;
 
     const user = await User.findById(userId).populate({

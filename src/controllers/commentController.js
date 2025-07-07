@@ -66,7 +66,7 @@ export const getPostComments = async (req, res, next) => {
   try {
     const { postId } = req.params;
     const page = parseInt(req.query.page, 10) || 1;
-    const limit = parseInt(req.query.limit, 10) || 20;
+    const limit = parseInt(req.query.limit, 10) || 1000;
     const skip = (page - 1) * limit;
 
     // Get ALL comments for the post (including replies)
@@ -123,7 +123,7 @@ export const getCommentReplies = async (req, res, next) => {
   try {
     const { commentId } = req.params;
     const page = parseInt(req.query.page, 10) || 1;
-    const limit = parseInt(req.query.limit, 10) || 10;
+    const limit = parseInt(req.query.limit, 10) || 1000;
     const skip = (page - 1) * limit;
 
     const replies = await Comment.find({ parent: commentId })
@@ -292,7 +292,7 @@ export const getAllPostCommentsFlat = async (req, res, next) => {
   try {
     const { postId } = req.params;
     const page = parseInt(req.query.page, 10) || 1;
-    const limit = parseInt(req.query.limit, 10) || 50;
+    const limit = parseInt(req.query.limit, 10) || 1000;
     const skip = (page - 1) * limit;
 
     // Get ALL comments for the post, sorted by creation date
