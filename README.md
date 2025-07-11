@@ -62,6 +62,7 @@ api-rede-social/
 
 ### 👤 Gerenciamento de Usuários
 - Perfil completo com nome, email, nickname único
+- Edição de perfil (nome, nickname e foto de perfil)
 - Senha criptografada com bcrypt e salt
 - Foto de perfil automática via DiceBear API
 - Histórico de posts curtidos (`likedPosts`)
@@ -91,10 +92,11 @@ api-rede-social/
 
 ### 🔐 Autenticação
 ```
-POST /api/auth/register - Registrar novo usuário
-POST /api/auth/login    - Login e obtenção de token JWT
-POST /api/auth/logout   - Logout e limpeza de cookies
-GET  /api/auth/me       - Obter dados do usuário logado
+POST /api/auth/register      - Registrar novo usuário
+POST /api/auth/login         - Login e obtenção de token JWT
+POST /api/auth/logout        - Logout e limpeza de cookies
+GET  /api/auth/me            - Obter dados do usuário logado
+PUT  /api/auth/update-profile - Atualizar perfil do usuário (nome, nickname, foto)
 ```
 
 ### 📝 Posts
@@ -262,6 +264,36 @@ Content-Type: application/json
 {
   "email": "joao@exemplo.com",
   "password": "senha123"
+}
+```
+
+### Atualizar perfil do usuário
+```bash
+PUT /api/auth/update-profile
+Authorization: Bearer [token]
+Content-Type: application/json
+
+{
+  "name": "João Silva Santos",
+  "nickname": "joao_santos",
+  "profilePicture": "https://exemplo.com/minha-foto.jpg"
+}
+
+# Resposta:
+{
+  "success": true,
+  "message": "Perfil atualizado com sucesso",
+  "data": {
+    "_id": "...",
+    "name": "João Silva Santos",
+    "email": "joao@exemplo.com",
+    "nickname": "joao_santos",
+    "profilePicture": "https://exemplo.com/minha-foto.jpg",
+    "likedPosts": [],
+    "savedPosts": [],
+    "createdAt": "...",
+    "updatedAt": "..."
+  }
 }
 ```
 

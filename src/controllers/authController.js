@@ -111,4 +111,71 @@ export const authController = {
       next(error);
     }
   },
+
+  async updateProfile(req, res, next) {
+    try {
+      const { name, nickname, profilePicture } = req.body;
+      const userId = req.user.id;
+
+      // Validar se pelo menos um campo foi fornecido
+      if (!name && !nickname && !profilePicture) {
+        return res.status(400).json({
+          success: false,
+          error: "Pelo menos um campo deve ser fornecido para atualização",
+        });
+      }
+
+      // Preparar os dados para atualização
+      const updateData = {};
+      if (name) updateData.name = name.trim();
+      if (nickname) updateData.nickname = nickname.trim().toLowerCase();
+      if (profilePicture) updateData.profilePicture = profilePicture;
+
+      // Verificar se o nickname já está em uso por outro usuário
+      if (nickname) {
+        const existingUser = await User.findOne({
+          nickname: nickname.trim().toLowerCase(),
+          _id: { $ne: userId },
+        });
+
+        if (existingUser) {
+          return res.status(400).json({
+            success: false,
+            error: "Este nickname já está em uso",
+          });
+        }
+      }
+
+      // Atualizar o usuário
+      const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
+        new: true,
+        runValidators: true,
+      });
+
+      if (!updatedUser) {
+        return res.status(404).json({
+          success: false,
+          error: "Usuário não encontrado",
+        });
+      }
+
+      logger.info(`Perfil atualizado para usuário ${userId}`, {
+        updatedFields: Object.keys(updateData),
+      });
+
+      res.status(200).json({
+        success: true,
+        message: "Perfil atualizado com sucesso",
+        data: updatedUser,
+      });
+    } catch (error) {
+      if (error.code === 11000) {
+        return res.status(400).json({
+          success: false,
+          error: "Nickname já está em uso",
+        });
+      }
+      next(error);
+    }
+  },
 };

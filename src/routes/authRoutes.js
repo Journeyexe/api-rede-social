@@ -8,3 +8,4 @@ router.post("/register", authController.register);
 router.post("/login", authController.login);
 router.post("/logout", authController.logout);
 router.get("/me", protect, authController.getMe);
+router.put("/update-profile", protect, authController.updateProfile);
