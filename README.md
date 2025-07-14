@@ -34,7 +34,8 @@ api-rede-social/
 │   ├── controllers/        # Controladores da aplicação
 │   │   ├── authController.js    # Autenticação e autorização
 │   │   ├── postController.js    # CRUD de posts e interações
-│   │   └── commentController.js # Sistema de comentários hierárquico
+│   │   ├── commentController.js # Sistema de comentários hierárquico
+│   │   └── userController.js    # Perfis de usuários
 │   ├── middleware/         # Middlewares customizados
 │   │   ├── authMiddleware.js    # Proteção JWT e autorização
 │   │   └── errorHandler.js      # Tratamento global de erros
@@ -45,7 +46,8 @@ api-rede-social/
 │   └── routes/             # Definição de rotas
 │       ├── authRoutes.js   # Rotas de autenticação
 │       ├── postRoutes.js   # Rotas de posts
-│       └── commentRoutes.js# Rotas de comentários
+│       ├── commentRoutes.js# Rotas de comentários
+│       └── userRoutes.js   # Rotas de perfis de usuários
 ├── combined.log           # Log combinado da aplicação
 └── error.log             # Log específico de erros
 ```
@@ -97,6 +99,11 @@ POST /api/auth/login         - Login e obtenção de token JWT
 POST /api/auth/logout        - Logout e limpeza de cookies
 GET  /api/auth/me            - Obter dados do usuário logado
 PUT  /api/auth/update-profile - Atualizar perfil do usuário (nome, nickname, foto)
+```
+
+### 👤 Perfis de Usuários
+```
+GET  /api/users/:id/profile  - Obter perfil completo do usuário com posts
 ```
 
 ### 📝 Posts
@@ -293,6 +300,44 @@ Content-Type: application/json
     "savedPosts": [],
     "createdAt": "...",
     "updatedAt": "..."
+  }
+}
+```
+
+### Obter perfil de usuário
+```bash
+GET /api/users/507f1f77bcf86cd799439011/profile
+Content-Type: application/json
+
+# Resposta:
+{
+  "success": true,
+  "data": {
+    "profile": {
+      "id": "507f1f77bcf86cd799439011",
+      "name": "João Silva",
+      "nickname": "joaosilva",
+      "profilePicture": "https://api.dicebear.com/9.x/dylan/png/seed=joaosilva"
+    },
+    "posts": [
+      {
+        "_id": "507f1f77bcf86cd799439012",
+        "title": "Meu primeiro post",
+        "content": "Conteúdo do post...",
+        "media_url": "https://example.com/image.jpg",
+        "likes_count": 5,
+        "saved_count": 2,
+        "comments_count": 3,
+        "user": {
+          "name": "João Silva",
+          "nickname": "joaosilva",
+          "profilePicture": "https://api.dicebear.com/9.x/dylan/png/seed=joaosilva"
+        },
+        "createdAt": "2025-01-15T10:30:00Z",
+        "updatedAt": "2025-01-15T10:30:00Z"
+      }
+    ],
+    "postsCount": 1
   }
 }
 ```

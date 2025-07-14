@@ -7,6 +7,7 @@ import { errorHandler } from "./middleware/errorHandler.js";
 import { connectDB } from "./config/database.js";
 import { router as authRoutes } from "./routes/authRoutes.js";
 import postRoutes from "./routes/postRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -25,6 +26,7 @@ app.use(
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/posts", postRoutes);
+app.use("/api/users", userRoutes);
 
 // Error handling
 app.use(errorHandler);

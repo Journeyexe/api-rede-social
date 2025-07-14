@@ -1,0 +1,9 @@
+import express from "express";
+import { userController } from "../controllers/userController.js";
+
+const router = express.Router();
+
+// GET /api/users/:id/profile - Buscar perfil do usuário com seus posts
+router.get("/:id/profile", userController.getProfile);
+
+export default router;
