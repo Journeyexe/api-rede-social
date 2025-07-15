@@ -9,6 +9,7 @@ const userSchema = new Schema({
     type: String,
     required: [true, "Name is required"],
     trim: true,
+    maxlength: [50, 'Name cannot exceed 50 characters'],
   },
   email: {
     type: String,
@@ -30,6 +31,7 @@ const userSchema = new Schema({
     trim: true,
     unique: true,
     minlength: [3, "Nickname must be at least 3 characters"],
+    maxlength: [50, 'Name cannot exceed 50 characters'],
   },
   profilePicture: {
     type: String,
