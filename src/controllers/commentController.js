@@ -127,13 +127,19 @@ export const getCommentReplies = async (req, res, next) => {
     const limit = parseInt(req.query.limit, 10) || 1000;
     const skip = (page - 1) * limit;
 
-    const replies = await Comment.find({ parent: commentId, isDeleted: { $ne: true } })
+    const replies = await Comment.find({
+      parent: commentId,
+      isDeleted: { $ne: true },
+    })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .populate("user", "name nickname profilePicture");
 
-    const total = await Comment.countDocuments({ parent: commentId, isDeleted: { $ne: true } });
+    const total = await Comment.countDocuments({
+      parent: commentId,
+      isDeleted: { $ne: true },
+    });
 
     res.status(200).json({
       success: true,
@@ -166,7 +172,7 @@ export const updateComment = async (req, res, next) => {
     }
 
     // Check if the user is the owner of the comment (admins can update any comment)
-    if (comment.user.toString() !== userId && req.user.role !== 'admin') {
+    if (comment.user.toString() !== userId && req.user.role !== "admin") {
       return res.status(403).json({
         success: false,
         message: "Not authorized to update this comment",
@@ -207,7 +213,7 @@ export const deleteComment = async (req, res, next) => {
     }
 
     // Check if the user is the owner of the comment (admins can delete any comment)
-    if (comment.user.toString() !== userId && req.user.role !== 'admin') {
+    if (comment.user.toString() !== userId && req.user.role !== "admin") {
       return res.status(403).json({
         success: false,
         message: "Not authorized to delete this comment",
@@ -216,7 +222,10 @@ export const deleteComment = async (req, res, next) => {
 
     // Soft delete replies recursively
     async function softDeleteReplies(parentId, deletedBy) {
-      const replies = await Comment.find({ parent: parentId, isDeleted: { $ne: true } });
+      const replies = await Comment.find({
+        parent: parentId,
+        isDeleted: { $ne: true },
+      });
 
       for (const reply of replies) {
         await softDeleteReplies(reply._id, deletedBy);
@@ -224,7 +233,7 @@ export const deleteComment = async (req, res, next) => {
 
       await Comment.updateMany(
         { parent: parentId, isDeleted: { $ne: true } },
-        { isDeleted: true, deletedAt: new Date(), deletedBy }
+        { isDeleted: true, deletedAt: new Date(), deletedBy },
       );
     }
 
@@ -312,7 +321,10 @@ export const getAllPostCommentsFlat = async (req, res, next) => {
       .limit(limit)
       .populate("user", "name nickname profilePicture");
 
-    const total = await Comment.countDocuments({ post: postId, isDeleted: { $ne: true } });
+    const total = await Comment.countDocuments({
+      post: postId,
+      isDeleted: { $ne: true },
+    });
 
     res.status(200).json({
       success: true,

@@ -17,7 +17,7 @@ async function makeAdmin() {
     const user = await User.findOneAndUpdate(
       { email },
       { role: "admin" },
-      { new: true }
+      { new: true },
     );
 
     if (!user) {

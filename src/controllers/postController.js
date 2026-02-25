@@ -69,7 +69,10 @@ export const getUserPosts = async (req, res, next) => {
       .limit(limit)
       .populate("user", "name nickname profilePicture");
 
-    const total = await Post.countDocuments({ user: userId, isDeleted: { $ne: true } });
+    const total = await Post.countDocuments({
+      user: userId,
+      isDeleted: { $ne: true },
+    });
 
     res.status(200).json({
       success: true,
@@ -89,7 +92,7 @@ export const getPostById = async (req, res, next) => {
   try {
     const post = await Post.findById(req.params.id).populate(
       "user",
-      "name nickname profilePicture"
+      "name nickname profilePicture",
     );
 
     if (!post || post.isDeleted) {
@@ -126,7 +129,7 @@ export const updatePost = async (req, res, next) => {
     }
 
     // Check if the user is the owner of the post (admins can update any post)
-    if (post.user.toString() !== req.user.id && req.user.role !== 'admin') {
+    if (post.user.toString() !== req.user.id && req.user.role !== "admin") {
       return res.status(403).json({
         success: false,
         message: "Not authorized to update this post",
@@ -141,7 +144,7 @@ export const updatePost = async (req, res, next) => {
         content,
         media_url,
       },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     ).populate("user", "name nickname profilePicture");
 
     res.status(200).json({
@@ -170,7 +173,7 @@ export const deletePost = async (req, res, next) => {
     }
 
     // Check if the user is the owner of the post (admins can delete any post)
-    if (post.user.toString() !== req.user.id && req.user.role !== 'admin') {
+    if (post.user.toString() !== req.user.id && req.user.role !== "admin") {
       return res.status(403).json({
         success: false,
         message: "Not authorized to delete this post",
@@ -223,7 +226,7 @@ export const likePost = async (req, res, next) => {
       // Unlike the post
       post.likes = post.likes.filter((id) => id.toString() !== userId);
       user.likedPosts = user.likedPosts.filter(
-        (id) => id.toString() !== postId
+        (id) => id.toString() !== postId,
       );
     } else {
       // Like the post
@@ -276,7 +279,7 @@ export const savePost = async (req, res, next) => {
       // Unsave the post
       post.saved = post.saved.filter((id) => id.toString() !== userId);
       user.savedPosts = user.savedPosts.filter(
-        (id) => id.toString() !== postId
+        (id) => id.toString() !== postId,
       );
     } else {
       // Save the post

@@ -125,9 +125,8 @@ export const setupAdminPanel = (app) => {
       resave: false,
       saveUninitialized: false,
       secret:
-        process.env.SESSION_SECRET ||
-        "session-secret-key-change-in-production",
-    }
+        process.env.SESSION_SECRET || "session-secret-key-change-in-production",
+    },
   );
 
   app.use(adminJs.options.rootPath, adminRouter);

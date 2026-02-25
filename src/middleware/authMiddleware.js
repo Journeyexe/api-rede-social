@@ -4,7 +4,7 @@ import { logger } from "../config/logger.js";
 
 export const protect = async (req, res, next) => {
   let token;
-  
+
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith("Bearer")
@@ -13,19 +13,19 @@ export const protect = async (req, res, next) => {
   } else if (req.cookies.jwt) {
     token = req.cookies.jwt;
   }
-  
+
   if (!token) {
     return res.status(401).json({
       success: false,
       error: "Não autorizado - Token não fornecido",
     });
   }
-  
+
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    
+
     req.user = await User.findById(decoded.id).select("-password");
-    
+
     if (!req.user) {
       return res.status(401).json({
         success: false,
@@ -39,7 +39,7 @@ export const protect = async (req, res, next) => {
         error: "Sua conta foi banida. Entre em contato com o administrador.",
       });
     }
-    
+
     next();
   } catch (error) {
     logger.error(error);

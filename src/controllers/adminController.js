@@ -276,9 +276,7 @@ export const adminController = {
           .sort({ createdAt: -1 })
           .skip(skip)
           .limit(limit)
-          .select(
-            "name nickname email role isBanned profilePicture createdAt"
-          ),
+          .select("name nickname email role isBanned profilePicture createdAt"),
         User.countDocuments(filter),
       ]);
 
@@ -356,7 +354,7 @@ export const adminController = {
       const user = await User.findByIdAndUpdate(
         req.params.id,
         { role },
-        { new: true, runValidators: true }
+        { new: true, runValidators: true },
       ).select("name nickname email role");
 
       if (!user) {
@@ -457,11 +455,11 @@ export const adminController = {
       await Promise.all([
         Post.updateMany(
           { user: user._id },
-          { isDeleted: true, deletedAt: new Date(), deletedBy: req.user.id }
+          { isDeleted: true, deletedAt: new Date(), deletedBy: req.user.id },
         ),
         Comment.updateMany(
           { user: user._id },
-          { isDeleted: true, deletedAt: new Date(), deletedBy: req.user.id }
+          { isDeleted: true, deletedAt: new Date(), deletedBy: req.user.id },
         ),
       ]);
 
@@ -576,7 +574,7 @@ export const adminController = {
       // Remove post from users' likedPosts and savedPosts
       await User.updateMany(
         { $or: [{ likedPosts: post._id }, { savedPosts: post._id }] },
-        { $pull: { likedPosts: post._id, savedPosts: post._id } }
+        { $pull: { likedPosts: post._id, savedPosts: post._id } },
       );
 
       await Post.findByIdAndDelete(req.params.id);

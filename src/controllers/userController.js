@@ -9,7 +9,7 @@ export const userController = {
 
       // Buscar o usuário por ID, excluindo informações sensíveis
       const user = await User.findById(id).select(
-        "name nickname profilePicture"
+        "name nickname profilePicture",
       );
 
       if (!user) {
