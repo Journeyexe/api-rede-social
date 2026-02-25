@@ -331,6 +331,74 @@ export const adminController = {
     }
   },
 
+  // PUT /api/admin/users/:id
+  async updateUser(req, res, next) {
+    try {
+      const {
+        name,
+        email,
+        nickname,
+        profilePicture,
+        role,
+        isBanned,
+        password,
+      } = req.body;
+
+      const user = await User.findById(req.params.id);
+
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: "User not found",
+        });
+      }
+
+      // Prevent self-demotion
+      if (req.params.id === req.user.id && role && role !== "admin") {
+        return res.status(400).json({
+          success: false,
+          message: "You cannot remove your own admin role",
+        });
+      }
+
+      // Prevent self-ban
+      if (req.params.id === req.user.id && isBanned) {
+        return res.status(400).json({
+          success: false,
+          message: "You cannot ban yourself",
+        });
+      }
+
+      if (name !== undefined) user.name = name;
+      if (email !== undefined) user.email = email;
+      if (nickname !== undefined) user.nickname = nickname;
+      if (profilePicture !== undefined) user.profilePicture = profilePicture;
+      if (role !== undefined) user.role = role;
+      if (isBanned !== undefined) user.isBanned = isBanned;
+      if (password && password.trim().length > 0) user.password = password;
+
+      await user.save();
+
+      const userData = user.toObject();
+      delete userData.password;
+
+      res.status(200).json({
+        success: true,
+        message: "User updated successfully",
+        data: userData,
+      });
+    } catch (error) {
+      if (error.code === 11000) {
+        return res.status(400).json({
+          success: false,
+          message: "Email or nickname already in use",
+        });
+      }
+      logger.error(`Error updating user: ${error.message}`);
+      next(error);
+    }
+  },
+
   // PUT /api/admin/users/:id/role
   async updateUserRole(req, res, next) {
     try {

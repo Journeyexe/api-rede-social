@@ -16,6 +16,7 @@ router.get("/stats/engagement", adminController.getEngagementStats);
 // User management
 router.get("/users", adminController.getAllUsers);
 router.get("/users/:id", adminController.getUserById);
+router.put("/users/:id", adminController.updateUser);
 router.put("/users/:id/role", adminController.updateUserRole);
 router.put("/users/:id/ban", adminController.toggleBanUser);
 router.delete("/users/:id", adminController.deleteUser);

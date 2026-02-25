@@ -2,6 +2,8 @@ import express from "express";
 import cors from "cors";
 import "dotenv/config";
 import cookieParser from "cookie-parser";
+import path from "path";
+import { fileURLToPath } from "url";
 import { logger } from "./config/logger.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { connectDB } from "./config/database.js";
@@ -9,7 +11,9 @@ import { router as authRoutes } from "./routes/authRoutes.js";
 import postRoutes from "./routes/postRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
-import { setupAdminPanel } from "./config/adminPanel.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -25,8 +29,8 @@ app.use(
   }),
 );
 
-// Admin Panel (AdminJS - visual interface at /admin)
-setupAdminPanel(app);
+// Admin Panel (static frontend)
+app.use("/admin", express.static(path.join(__dirname, "public/admin")));
 
 // Routes
 app.use("/api/auth", authRoutes);

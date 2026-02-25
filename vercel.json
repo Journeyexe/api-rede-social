@@ -1,13 +1,20 @@
 {
   "version": 2,
-  "installCommand": "npm install --include=optional",
   "builds": [
+    {
+      "src": "src/public/**",
+      "use": "@vercel/static"
+    },
     {
       "src": "src/app.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
+    {
+      "src": "/admin(.*)",
+      "dest": "src/public/admin/index.html"
+    },
     {
       "src": "(.*)",
       "dest": "src/app.js"
