@@ -32,6 +32,13 @@ export const protect = async (req, res, next) => {
         error: "Usuário não encontrado",
       });
     }
+
+    if (req.user.isBanned) {
+      return res.status(403).json({
+        success: false,
+        error: "Sua conta foi banida. Entre em contato com o administrador.",
+      });
+    }
     
     next();
   } catch (error) {

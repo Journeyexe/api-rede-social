@@ -19,8 +19,8 @@ export const userController = {
         });
       }
 
-      // Buscar todos os posts do usuário
-      const posts = await Post.find({ user: id })
+      // Buscar todos os posts do usuário (excluindo deletados)
+      const posts = await Post.find({ user: id, isDeleted: { $ne: true } })
         .populate("user", "name nickname profilePicture")
         .sort({ createdAt: -1 }); // Ordenar por data de criação (mais recente primeiro)
 

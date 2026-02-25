@@ -11,7 +11,7 @@ export const createComment = async (req, res, next) => {
 
     // Check if post exists
     const post = await Post.findById(postId);
-    if (!post) {
+    if (!post || post.isDeleted) {
       return res.status(404).json({
         success: false,
         message: "Post not found",
@@ -69,9 +69,10 @@ export const getPostComments = async (req, res, next) => {
     const limit = parseInt(req.query.limit, 10) || 1000;
     const skip = (page - 1) * limit;
 
-    // Get ALL comments for the post (including replies)
+    // Get ALL comments for the post (excluding deleted)
     const allComments = await Comment.find({
       post: postId,
+      isDeleted: { $ne: true },
     })
       .sort({ createdAt: -1 })
       .populate("user", "name nickname profilePicture");
@@ -126,13 +127,13 @@ export const getCommentReplies = async (req, res, next) => {
     const limit = parseInt(req.query.limit, 10) || 1000;
     const skip = (page - 1) * limit;
 
-    const replies = await Comment.find({ parent: commentId })
+    const replies = await Comment.find({ parent: commentId, isDeleted: { $ne: true } })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .populate("user", "name nickname profilePicture");
 
-    const total = await Comment.countDocuments({ parent: commentId });
+    const total = await Comment.countDocuments({ parent: commentId, isDeleted: { $ne: true } });
 
     res.status(200).json({
       success: true,
@@ -157,15 +158,15 @@ export const updateComment = async (req, res, next) => {
     // Find comment
     const comment = await Comment.findById(commentId);
 
-    if (!comment) {
+    if (!comment || comment.isDeleted) {
       return res.status(404).json({
         success: false,
         message: "Comment not found",
       });
     }
 
-    // Check if the user is the owner of the comment
-    if (comment.user.toString() !== userId) {
+    // Check if the user is the owner of the comment (admins can update any comment)
+    if (comment.user.toString() !== userId && req.user.role !== 'admin') {
       return res.status(403).json({
         success: false,
         message: "Not authorized to update this comment",
@@ -198,37 +199,43 @@ export const deleteComment = async (req, res, next) => {
     // Find comment
     const comment = await Comment.findById(commentId);
 
-    if (!comment) {
+    if (!comment || comment.isDeleted) {
       return res.status(404).json({
         success: false,
         message: "Comment not found",
       });
     }
 
-    // Check if the user is the owner of the comment
-    if (comment.user.toString() !== userId) {
+    // Check if the user is the owner of the comment (admins can delete any comment)
+    if (comment.user.toString() !== userId && req.user.role !== 'admin') {
       return res.status(403).json({
         success: false,
         message: "Not authorized to delete this comment",
       });
     }
 
-    // Delete replies recursively
-    async function deleteReplies(commentId) {
-      const replies = await Comment.find({ parent: commentId });
+    // Soft delete replies recursively
+    async function softDeleteReplies(parentId, deletedBy) {
+      const replies = await Comment.find({ parent: parentId, isDeleted: { $ne: true } });
 
       for (const reply of replies) {
-        await deleteReplies(reply._id);
+        await softDeleteReplies(reply._id, deletedBy);
       }
 
-      await Comment.deleteMany({ parent: commentId });
+      await Comment.updateMany(
+        { parent: parentId, isDeleted: { $ne: true } },
+        { isDeleted: true, deletedAt: new Date(), deletedBy }
+      );
     }
 
-    // Delete all replies
-    await deleteReplies(commentId);
+    // Soft delete all replies
+    await softDeleteReplies(commentId, req.user.id);
 
-    // Delete the comment
-    await Comment.findByIdAndDelete(commentId);
+    // Soft delete the comment
+    comment.isDeleted = true;
+    comment.deletedAt = new Date();
+    comment.deletedBy = req.user.id;
+    await comment.save();
 
     // If it was a top-level comment, decrement the post's comments_count
     if (!comment.parent) {
@@ -255,7 +262,7 @@ export const likeComment = async (req, res, next) => {
 
     const comment = await Comment.findById(commentId);
 
-    if (!comment) {
+    if (!comment || comment.isDeleted) {
       return res.status(404).json({
         success: false,
         message: "Comment not found",
@@ -295,16 +302,17 @@ export const getAllPostCommentsFlat = async (req, res, next) => {
     const limit = parseInt(req.query.limit, 10) || 1000;
     const skip = (page - 1) * limit;
 
-    // Get ALL comments for the post, sorted by creation date
+    // Get ALL comments for the post, sorted by creation date (excluding deleted)
     const comments = await Comment.find({
       post: postId,
+      isDeleted: { $ne: true },
     })
       .sort({ createdAt: 1 }) // Ascending order to maintain conversation flow
       .skip(skip)
       .limit(limit)
       .populate("user", "name nickname profilePicture");
 
-    const total = await Comment.countDocuments({ post: postId });
+    const total = await Comment.countDocuments({ post: postId, isDeleted: { $ne: true } });
 
     res.status(200).json({
       success: true,

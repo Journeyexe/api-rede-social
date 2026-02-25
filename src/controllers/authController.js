@@ -68,6 +68,13 @@ export const authController = {
         });
       }
 
+      if (user.isBanned) {
+        return res.status(403).json({
+          success: false,
+          error: "Sua conta foi banida. Entre em contato com o administrador.",
+        });
+      }
+
       const token = generateToken(user._id);
 
       res.cookie("jwt", token, cookieOptions);

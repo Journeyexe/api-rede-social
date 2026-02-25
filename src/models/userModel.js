@@ -39,6 +39,15 @@ const userSchema = new Schema({
       return `https://api.dicebear.com/9.x/dylan/png/seed=${this.nickname}`;
     },
   },
+  role: {
+    type: String,
+    enum: ["user", "admin"],
+    default: "user",
+  },
+  isBanned: {
+    type: Boolean,
+    default: false,
+  },
   likedPosts: [
     {
       type: Schema.Types.ObjectId,

@@ -34,13 +34,13 @@ export const getAllPosts = async (req, res, next) => {
     const limit = parseInt(req.query.limit, 10) || 1000;
     const skip = (page - 1) * limit;
 
-    const posts = await Post.find()
+    const posts = await Post.find({ isDeleted: { $ne: true } })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .populate("user", "name nickname profilePicture");
 
-    const total = await Post.countDocuments();
+    const total = await Post.countDocuments({ isDeleted: { $ne: true } });
 
     res.status(200).json({
       success: true,
@@ -63,13 +63,13 @@ export const getUserPosts = async (req, res, next) => {
     const limit = parseInt(req.query.limit, 10) || 1000;
     const skip = (page - 1) * limit;
 
-    const posts = await Post.find({ user: userId })
+    const posts = await Post.find({ user: userId, isDeleted: { $ne: true } })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .populate("user", "name nickname profilePicture");
 
-    const total = await Post.countDocuments({ user: userId });
+    const total = await Post.countDocuments({ user: userId, isDeleted: { $ne: true } });
 
     res.status(200).json({
       success: true,
@@ -92,7 +92,7 @@ export const getPostById = async (req, res, next) => {
       "name nickname profilePicture"
     );
 
-    if (!post) {
+    if (!post || post.isDeleted) {
       return res.status(404).json({
         success: false,
         message: "Post not found",
@@ -118,15 +118,15 @@ export const updatePost = async (req, res, next) => {
     // Find post and check if user is the owner
     const post = await Post.findById(postId);
 
-    if (!post) {
+    if (!post || post.isDeleted) {
       return res.status(404).json({
         success: false,
         message: "Post not found",
       });
     }
 
-    // Check if the user is the owner of the post
-    if (post.user.toString() !== req.user.id) {
+    // Check if the user is the owner of the post (admins can update any post)
+    if (post.user.toString() !== req.user.id && req.user.role !== 'admin') {
       return res.status(403).json({
         success: false,
         message: "Not authorized to update this post",
@@ -162,22 +162,26 @@ export const deletePost = async (req, res, next) => {
     // Find post and check if user is the owner
     const post = await Post.findById(postId);
 
-    if (!post) {
+    if (!post || post.isDeleted) {
       return res.status(404).json({
         success: false,
         message: "Post not found",
       });
     }
 
-    // Check if the user is the owner of the post
-    if (post.user.toString() !== req.user.id) {
+    // Check if the user is the owner of the post (admins can delete any post)
+    if (post.user.toString() !== req.user.id && req.user.role !== 'admin') {
       return res.status(403).json({
         success: false,
         message: "Not authorized to delete this post",
       });
     }
 
-    await Post.findByIdAndDelete(postId);
+    // Soft delete
+    post.isDeleted = true;
+    post.deletedAt = new Date();
+    post.deletedBy = req.user.id;
+    await post.save();
 
     res.status(200).json({
       success: true,
@@ -198,7 +202,7 @@ export const likePost = async (req, res, next) => {
     const post = await Post.findById(postId);
     const user = await User.findById(userId);
 
-    if (!post) {
+    if (!post || post.isDeleted) {
       return res.status(404).json({
         success: false,
         message: "Post not found",
@@ -251,7 +255,7 @@ export const savePost = async (req, res, next) => {
     const post = await Post.findById(postId);
     const user = await User.findById(userId);
 
-    if (!post) {
+    if (!post || post.isDeleted) {
       return res.status(404).json({
         success: false,
         message: "Post not found",

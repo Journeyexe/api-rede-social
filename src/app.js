@@ -8,6 +8,8 @@ import { connectDB } from "./config/database.js";
 import { router as authRoutes } from "./routes/authRoutes.js";
 import postRoutes from "./routes/postRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
+import { setupAdminPanel } from "./config/adminPanel.js";
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -23,10 +25,14 @@ app.use(
   })
 );
 
+// Admin Panel (AdminJS - visual interface at /admin)
+setupAdminPanel(app);
+
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/admin", adminRoutes);
 
 // Error handling
 app.use(errorHandler);
